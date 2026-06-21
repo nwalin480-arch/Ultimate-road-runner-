@@ -23,7 +23,6 @@ import com.unity3d.ads.UnityAds
 import com.unity3d.ads.UnityAdsShowOptions
 import com.unity3d.ads.banners.BannerErrorInfo
 import com.unity3d.ads.banners.BannerView
-import com.unity3d.ads.banners.IUnityBannerListener
 import com.unity3d.ads.banners.UnityBannerSize
 
 class MainActivity : AppCompatActivity() {
@@ -133,16 +132,15 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadBanner() {
         bannerView = BannerView(this, BANNER_PLACEMENT, UnityBannerSize.getDynamicSize(this))
-        bannerView!!.listener = object : IUnityBannerListener {
-            override fun onBannerLoaded(view: BannerView) {
+        bannerView!!.listener = object : BannerView.IListener {
+            override fun onBannerLoaded(bannerAdView: BannerView) {
                 Log.d(TAG, "Banner loaded")
             }
-            override fun onBannerShown(view: BannerView) {}
-            override fun onBannerClick(view: BannerView) {}
-            override fun onBannerFailedToLoad(view: BannerView, errorInfo: BannerErrorInfo) {
+            override fun onBannerClick(bannerAdView: BannerView) {}
+            override fun onBannerFailedToLoad(bannerAdView: BannerView, errorInfo: BannerErrorInfo) {
                 Log.e(TAG, "Banner failed: ${errorInfo.errorMessage}")
             }
-            override fun onBannerLeftApplication(view: BannerView) {}
+            override fun onBannerLeftApplication(bannerAdView: BannerView) {}
         }
         bannerView!!.load()
     }
