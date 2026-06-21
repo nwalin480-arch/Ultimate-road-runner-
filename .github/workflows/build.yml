@@ -18,9 +18,22 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Decode keystore
+      - name: Generate keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/road-runner-release.keystore
+          keytool -genkeypair -v \
+            -keystore android/app/road-runner-release.keystore \
+            -alias "${{ secrets.KEY_ALIAS }}" \
+            -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
+            -keypass "${{ secrets.KEY_PASSWORD }}" \
+            -dname "CN=Rock City, OU=Games, O=Rock City, L=City, S=State, C=US"
+
+      - name: Save keystore as artifact (download & keep this for Play Store updates)
+        uses: actions/upload-artifact@v4
+        with:
+          name: road-runner-keystore
+          path: android/app/road-runner-release.keystore
+          retention-days: 90
 
       - name: Copy game files into Android assets
         run: |
@@ -39,7 +52,7 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew assembleRelease
 
-      - name: Sign APK
+      - name: Align and Sign APK
         run: |
           BUILD_TOOLS=$(ls $ANDROID_HOME/build-tools | sort -V | tail -1)
           $ANDROID_HOME/build-tools/$BUILD_TOOLS/zipalign -v -p 4 \
