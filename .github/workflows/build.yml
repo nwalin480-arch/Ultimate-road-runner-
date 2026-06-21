@@ -23,22 +23,9 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Generate keystore
+      - name: Decode keystore from secret
         run: |
-          keytool -genkeypair -v \
-            -keystore android/app/road-runner-release.keystore \
-            -alias "${{ secrets.KEY_ALIAS }}" \
-            -keyalg RSA -keysize 2048 -validity 10000 \
-            -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
-            -keypass "${{ secrets.KEY_PASSWORD }}" \
-            -dname "CN=Rock City, OU=Games, O=Rock City, L=City, S=State, C=US"
-
-      - name: Save keystore as artifact (keep for Play Store updates)
-        uses: actions/upload-artifact@v4
-        with:
-          name: road-runner-keystore
-          path: android/app/road-runner-release.keystore
-          retention-days: 90
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/road-runner-release.keystore
 
       - name: Copy game files into Android assets
         run: |
@@ -46,13 +33,16 @@ jobs:
           cp index.html android/app/src/main/assets/game/
           cp -r game-files/. android/app/src/main/assets/game/
 
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
       - name: Build Release APK
         working-directory: android
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: gradle assembleRelease
+        run: ./gradlew assembleRelease
 
       - name: Align and Sign APK
         run: |
