@@ -62,7 +62,7 @@
             }
         }
 
-        /* Native → JS callbacks */
+        /* Native → JS callbacks (called by Kotlin via evaluateJavascript) */
         window.onInterstitialAdLoaded   = function() { _adEmitter.emit('interstitial_state_changed', 'loaded'); };
         window.onInterstitialAdClosed   = function() { _resumeGame(); _adEmitter.emit('interstitial_state_changed', 'closed'); };
         window.onInterstitialAdFailed   = function() { _resumeGame(); _adEmitter.emit('interstitial_state_changed', 'failed'); };
@@ -73,7 +73,7 @@
         window.onBannerAdShown          = function() { _adEmitter.emit('banner_state_changed', 'shown'); };
         window.onBannerAdHidden         = function() { _adEmitter.emit('banner_state_changed', 'hidden'); };
 
-        /* bridge.advertisement — same API the game code used via Playgama */
+        /* bridge.advertisement — routes to AndroidBridge (Unity Ads via Kotlin) */
         window.bridge = {
             advertisement: {
                 isInterstitialSupported: true,
@@ -103,10 +103,7 @@
                     return Promise.resolve();
                 }
             },
-            platform: {
-                on: function() {},
-                sendMessage: function() {}
-            },
+            platform: { on: function() {}, sendMessage: function() {} },
             EVENT_NAME: {
                 PAUSE_STATE_CHANGED: 'pause_state_changed',
                 AUDIO_STATE_CHANGED: 'audio_state_changed',
@@ -136,7 +133,7 @@
             } catch(e) {}
         };
 
-        /* ── Ad timers — interstitial on death, banner always shown ───────── */
+        /* ── Ad timers — interstitial on death, banner on load ────────────── */
         window._startAdTimers = function() {
             var _origOnDeath = window.gmOnDeath;
             window.gmOnDeath = function(runtimeScene) {
@@ -144,11 +141,6 @@
                 window._pgSaveProgress && window._pgSaveProgress();
                 try { bridge.advertisement.showInterstitial(); } catch(e) {}
             };
-            var _origHideRevive = window.gmHideReviveButton;
-            window.gmHideReviveButton = function() {
-                _origHideRevive && _origHideRevive();
-            };
-            /* Show banner immediately */
             setTimeout(function() {
                 try { bridge.advertisement.showBanner(); } catch(e) {}
             }, 1000);
@@ -211,30 +203,71 @@
     <script src="pixi-renderers/three.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/ThreeAddons.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/draco/gltf/draco_decoder.wasm" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/draco/gltf/draco_wasm_wrapper.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/Scene3DTools.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/A_RuntimeObject3D.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/A_RuntimeObject3DRenderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/CustomRuntimeObject3D.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/CustomRuntimeObject3DRenderer.js" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/pixi.js" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/pixi-filters-tools.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/runtimegame-pixi-renderer.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/runtimescene-pixi-renderer.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/layer-pixi-renderer.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/pixi-image-manager.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/pixi-bitmapfont-manager.js" crossorigin="anonymous"></script>
-    <script src="pixi-renderers/pixi-3d-manager.js" crossorigin="anonymous"></script>
-    <script src="pixi-renderers/loadingscreen-pixi-renderer.js" crossorigin="anonymous"></script>
-    <script src="pixi-renderers/PixiJS.js" crossorigin="anonymous"></script>
-    <script src="pixi-renderers/runtimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/spriteruntimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
     <script src="pixi-renderers/CustomRuntimeObject2DPixiRenderer.js" crossorigin="anonymous"></script>
-    <script src="Extensions/3D/runtimeobject3d.js" crossorigin="anonymous"></script>
-    <script src="Extensions/3D/runtimeobject3d-pixi-renderer.js" crossorigin="anonymous"></script>
-    <script src="Extensions/3D/CustomRuntimeObject3DPixiRenderer.js" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/DebuggerPixiRenderer.js" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/loadingscreen-pixi-renderer.js" crossorigin="anonymous"></script>
+    <script src="pixi-renderers/pixi-effects-manager.js" crossorigin="anonymous"></script>
+    <script src="howler-sound-manager/howler.min.js" crossorigin="anonymous"></script>
+    <script src="howler-sound-manager/howler-sound-manager.js" crossorigin="anonymous"></script>
+    <script src="fontfaceobserver-font-manager/fontfaceobserver.js" crossorigin="anonymous"></script>
+    <script src="fontfaceobserver-font-manager/fontfaceobserver-font-manager.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/Base3DBehavior.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/Cube3DRuntimeObject.js" crossorigin="anonymous"></script>
+    <script src="Extensions/3D/Cube3DRuntimeObjectPixiRenderer.js" crossorigin="anonymous"></script>
     <script src="Extensions/3D/Model3DRuntimeObject.js" crossorigin="anonymous"></script>
     <script src="Extensions/3D/Model3DRuntimeObject3DRenderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/AnchorBehavior/anchorruntimebehavior.js" crossorigin="anonymous"></script>
+    <script src="Extensions/BitmapText/bitmaptextruntimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/BitmapText/bitmaptextruntimeobject.js" crossorigin="anonymous"></script>
+    <script src="Extensions/DebuggerTools/debuggertools.js" crossorigin="anonymous"></script>
+    <script src="Extensions/DraggableBehavior/draggableruntimebehavior.js" crossorigin="anonymous"></script>
     <script src="Extensions/Effects/outline-pixi-filter.js" crossorigin="anonymous"></script>
     <script src="Extensions/Effects/pixi-filters/filter-outline.js" crossorigin="anonymous"></script>
+    <script src="Extensions/Leaderboards/sha256.js" crossorigin="anonymous"></script>
+    <script src="Extensions/Leaderboards/leaderboardstools.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PanelSpriteObject/panelspriteruntimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PanelSpriteObject/panelspriteruntimeobject.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PlayerAuthentication/playerauthenticationcomponents.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PlayerAuthentication/playerauthenticationtools.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PrimitiveDrawing/pixi-graphics-extras/graphics-extras.min.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PrimitiveDrawing/shapepainterruntimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/PrimitiveDrawing/shapepainterruntimeobject.js" crossorigin="anonymous"></script>
+    <script src="Extensions/SystemInfo/systeminfotools.js" crossorigin="anonymous"></script>
+    <script src="Extensions/TextObject/textruntimeobject-pixi-renderer.js" crossorigin="anonymous"></script>
+    <script src="Extensions/TextObject/textruntimeobject.js" crossorigin="anonymous"></script>
+    <script src="Extensions/TweenBehavior/TweenManager.js" crossorigin="anonymous"></script>
+    <script src="Extensions/TweenBehavior/tweenruntimebehavior.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__buttonstates__buttonfsm.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__gridjump3d__gridjump3d.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__linearmovement__linearmovementbyangle.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__panelspritebutton__buttonfsm.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__panelspritebutton__isingameedition-func.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__panelspritebutton__panelspritebutton.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__panelspriteslider__buttonfsm.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__panelspriteslider__isingameedition-func.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__panelspriteslider__panelspriteslider.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__panelspriteslider__slider.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__repeateveryxseconds__deletetimer-func.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__repeateveryxseconds__repeat-func.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__repeateveryxseconds__repeatxtimes-func.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__repeateveryxseconds__repetition-func.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__screenorientationchecker__isingameedition-func.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__screenorientationchecker__onfirstsceneloaded-func.js" crossorigin="anonymous"></script>
+    <script src="gdjs-evtsext__screenorientationchecker__projectorientation-func.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__screenorientationchecker__screenorientationchecker.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__smoothcamera__smoothcamera.js" crossorigin="anonymous"></script>
     <script src="gdjs-evtsext__sticker__definehelperclasses-func.js" crossorigin="anonymous"></script>
@@ -274,10 +307,8 @@
     <script src="object-capabilities/TextContainerBehavior.js" crossorigin="anonymous"></script>
     <script src="Extensions/3D/DirectionalLight.js" crossorigin="anonymous"></script>
     <script src="Extensions/3D/HemisphereLight.js" crossorigin="anonymous"></script>
-    <script src="Extensions/Effects/outline-pixi-filter.js" crossorigin="anonymous"></script>
-    <script src="Extensions/Effects/pixi-filters/filter-outline.js" crossorigin="anonymous"></script>
-    <script src="code0.js?v=5" crossorigin="anonymous"></script>
-    <script src="data.js?v=5" crossorigin="anonymous"></script>
+    <script src="code0.js?v=6" crossorigin="anonymous"></script>
+    <script src="data.js?v=6" crossorigin="anonymous"></script>
 </head>
 <body>
     <script>
@@ -319,9 +350,6 @@
 
             /* Auto-save every 30s and on hide */
             setInterval(function() { window._pgSaveProgress && window._pgSaveProgress(); }, 30000);
-            document.addEventListener('visibilitychange', function() {
-                if (document.hidden) window._pgSaveProgress && window._pgSaveProgress();
-            });
 
             /* Background music */
             var _bgm = new Audio("bgm.mp3");
@@ -337,7 +365,7 @@
             document.addEventListener("click", _startBgm);
             document.addEventListener("touchend", _startBgm);
 
-            /* Purge removed buttons */
+            /* Purge buttons that were removed from the game */
             function purgeRemovedButtons() {
                 try {
                     var stack = game._sceneStack && game._sceneStack._stack;
