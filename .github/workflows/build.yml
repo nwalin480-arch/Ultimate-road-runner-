@@ -18,6 +18,9 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
       - name: Generate keystore
         run: |
           keytool -genkeypair -v \
@@ -28,7 +31,7 @@ jobs:
             -keypass "${{ secrets.KEY_PASSWORD }}" \
             -dname "CN=Rock City, OU=Games, O=Rock City, L=City, S=State, C=US"
 
-      - name: Save keystore as artifact (download & keep this for Play Store updates)
+      - name: Save keystore as artifact (keep for Play Store updates)
         uses: actions/upload-artifact@v4
         with:
           name: road-runner-keystore
@@ -41,16 +44,13 @@ jobs:
           cp index.html android/app/src/main/assets/game/
           cp -r game-files/. android/app/src/main/assets/game/
 
-      - name: Make gradlew executable
-        run: chmod +x android/gradlew
-
       - name: Build Release APK
         working-directory: android
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: ./gradlew assembleRelease
+        run: gradle assembleRelease
 
       - name: Align and Sign APK
         run: |
