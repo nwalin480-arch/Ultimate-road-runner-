@@ -109,9 +109,15 @@ class MainActivity : AppCompatActivity() {
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
 
+        // Required for WebGL 3D content (GLB models, Three.js renderer)
+        webView.setLayerType(View.LAYER_TYPE_HARDWARE, null)
+
         webView.settings.apply {
             javaScriptEnabled                = true
             domStorageEnabled                = true
+            allowFileAccess                  = true
+            allowContentAccess               = true
+            databaseEnabled                  = true
             mediaPlaybackRequiresUserGesture = false
             cacheMode                        = WebSettings.LOAD_DEFAULT
         }
