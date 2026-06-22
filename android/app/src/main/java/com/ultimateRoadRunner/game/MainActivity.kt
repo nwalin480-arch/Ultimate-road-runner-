@@ -43,9 +43,9 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "UltimateRoadRunner"
 
     companion object {
-        private const val INTERSTITIAL_ID = "ca-app-pub-1078340192803579/8852137824"
-        private const val BANNER_ID       = "ca-app-pub-1078340192803579/1245110540"
-        private const val REWARDED_ID     = "ca-app-pub-1078340192803579/6497437223"
+        private const val INTERSTITIAL_ID = "ca-app-pub-1078340192803579/6497437223"
+        private const val BANNER_ID       = "ca-app-pub-1078340192803579/8852137824"
+        private const val REWARDED_ID     = "ca-app-pub-1078340192803579/1245110540"
     }
 
     @SuppressLint("SetJavaScriptEnabled")
