@@ -11,10 +11,9 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
-        <!-- Unity Ads Game ID -->
         <meta-data
-            android:name="com.unity3d.ads.APPLICATION_GAME_ID"
-            android:value="800076272" />
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-1078340192803579~4711758431"/>
 
         <activity
             android:name=".MainActivity"
