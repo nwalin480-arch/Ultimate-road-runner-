@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace 'com.ultimateRoadRunner.game'
+    namespace 'com.ultimateroadrunner.game'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.ultimateRoadRunner.game"
+        applicationId "com.ultimateroadrunner.game"
         minSdk 24
         targetSdk 34
         versionCode 1
