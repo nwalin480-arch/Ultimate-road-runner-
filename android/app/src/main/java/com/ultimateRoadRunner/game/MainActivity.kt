@@ -1,6 +1,8 @@
 package com.ultimateRoadRunner.game
 
 import android.annotation.SuppressLint
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -43,9 +45,10 @@ class MainActivity : AppCompatActivity() {
     private val TAG = "UltimateRoadRunner"
 
     companion object {
-        private const val INTERSTITIAL_ID = "ca-app-pub-1078340192803579/6497437223"
-        private const val BANNER_ID       = "ca-app-pub-1078340192803579/8852137824"
-        private const val REWARDED_ID     = "ca-app-pub-1078340192803579/1245110540"
+        private const val INTERSTITIAL_ID    = "ca-app-pub-1078340192803579/6497437223"
+        private const val BANNER_ID          = "ca-app-pub-1078340192803579/8852137824"
+        private const val REWARDED_ID        = "ca-app-pub-1078340192803579/1245110540"
+        const val PRIVACY_POLICY_URL         = "https://ultimate-road-runner-policy.sharoncmons03.replit.app"
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -202,6 +205,13 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             bannerContainer.visibility = View.GONE
             callJS("onBannerAdHidden")
+        }
+    }
+
+    fun openPrivacyPolicy() {
+        runOnUiThread {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PRIVACY_POLICY_URL))
+            startActivity(intent)
         }
     }
 
