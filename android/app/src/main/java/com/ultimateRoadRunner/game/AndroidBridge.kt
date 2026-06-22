@@ -1,5 +1,7 @@
 package com.ultimateRoadRunner.game
 
+import android.content.Intent
+import android.net.Uri
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 
@@ -19,6 +21,9 @@ class AndroidBridge(
 
     @JavascriptInterface
     fun hideBanner() { activity.hideAdBanner() }
+
+    @JavascriptInterface
+    fun openPrivacyPolicy() { activity.openPrivacyPolicy() }
 
     @JavascriptInterface
     fun onGameReady() {
