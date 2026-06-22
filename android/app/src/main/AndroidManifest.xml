@@ -15,6 +15,10 @@
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1078340192803579~4711758431"/>
 
+        <meta-data
+            android:name="privacy_policy_url"
+            android:value="https://ultimate-road-runner-policy.sharoncmons03.replit.app"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
