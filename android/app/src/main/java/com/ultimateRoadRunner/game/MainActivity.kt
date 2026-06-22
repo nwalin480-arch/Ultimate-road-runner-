@@ -16,11 +16,6 @@ import androidx.webkit.WebViewAssetLoader
 import com.google.android.ump.ConsentInformation
 import com.google.android.ump.ConsentRequestParameters
 import com.google.android.ump.UserMessagingPlatform
-import com.unity3d.ads.IUnityAdsInitializationListener
-import com.unity3d.ads.IUnityAdsLoadListener
-import com.unity3d.ads.IUnityAdsShowListener
-import com.unity3d.ads.UnityAds
-import com.unity3d.ads.UnityAdsShowOptions
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,14 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bannerContainer: FrameLayout
     private lateinit var consentInformation: ConsentInformation
 
-    private var adsInitialized      = false
-    private var interstitialLoaded  = false
-    private var rewardedLoaded      = false
-
-    private val GAME_ID                = "800076272"
-    private val INTERSTITIAL_PLACEMENT = "Interstitial_Android"
-    private val REWARDED_PLACEMENT     = "Rewarded_Android"
-    private val TAG                    = "UltimateRoadRunner"
+    private val TAG = "UltimateRoadRunner"
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         requestConsent()
     }
 
-    /* ── UMP Consent ──────────────────────────────────────────────────────── */
+    /* ── UMP Consent (kept ready for AdMob) ──────────────────────────────── */
 
     private fun requestConsent() {
         consentInformation = UserMessagingPlatform.getConsentInformation(this)
@@ -69,35 +57,10 @@ class MainActivity : AppCompatActivity() {
             {
                 UserMessagingPlatform.loadAndShowConsentFormIfRequired(this) { formError ->
                     if (formError != null) Log.e(TAG, "Consent form error: ${formError.message}")
-                    if (consentInformation.canRequestAds()) initAds()
                 }
             },
-            { error ->
-                Log.e(TAG, "Consent update failed: ${error.message}")
-                initAds()
-            }
+            { error -> Log.e(TAG, "Consent update failed: ${error.message}") }
         )
-        if (consentInformation.canRequestAds()) initAds()
-    }
-
-    /* ── Unity Ads Init ───────────────────────────────────────────────────── */
-
-    private fun initAds() {
-        if (adsInitialized) return
-        adsInitialized = true
-
-        UnityAds.initialize(this, GAME_ID, false, object : IUnityAdsInitializationListener {
-            override fun onInitializationComplete() {
-                Log.d(TAG, "Unity Ads initialized")
-                loadInterstitial()
-                loadRewarded()
-            }
-            override fun onInitializationFailed(
-                error: UnityAds.UnityAdsInitializationError, message: String
-            ) {
-                Log.e(TAG, "Unity Ads init failed: $message")
-            }
-        })
     }
 
     /* ── WebView ──────────────────────────────────────────────────────────── */
@@ -134,120 +97,14 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("https://appassets.androidplatform.net/assets/game/index.html")
     }
 
-    /* ── Interstitial ─────────────────────────────────────────────────────── */
-
-    private fun loadInterstitial() {
-        interstitialLoaded = false
-        UnityAds.load(INTERSTITIAL_PLACEMENT, object : IUnityAdsLoadListener {
-            override fun onUnityAdsAdLoaded(placementId: String) {
-                Log.d(TAG, "Interstitial loaded")
-                interstitialLoaded = true
-                bridge.callJS("onInterstitialAdLoaded")
-            }
-            override fun onUnityAdsFailedToLoad(
-                placementId: String,
-                error: UnityAds.UnityAdsLoadError,
-                message: String
-            ) {
-                Log.e(TAG, "Interstitial load failed: $message")
-            }
-        })
-    }
-
-    fun showInterstitial() {
-        if (interstitialLoaded) {
-            interstitialLoaded = false
-            UnityAds.show(this, INTERSTITIAL_PLACEMENT, UnityAdsShowOptions(),
-                object : IUnityAdsShowListener {
-                    override fun onUnityAdsShowComplete(
-                        placementId: String,
-                        state: UnityAds.UnityAdsShowCompletionState
-                    ) {
-                        bridge.callJS("onInterstitialAdClosed")
-                        loadInterstitial()
-                    }
-                    override fun onUnityAdsShowFailure(
-                        placementId: String,
-                        error: UnityAds.UnityAdsShowError,
-                        message: String
-                    ) {
-                        bridge.callJS("onInterstitialAdFailed")
-                        loadInterstitial()
-                    }
-                    override fun onUnityAdsShowStart(placementId: String) {}
-                    override fun onUnityAdsShowClick(placementId: String) {}
-                })
-        } else {
-            bridge.callJS("onInterstitialAdFailed")
-            loadInterstitial()
-        }
-    }
-
-    /* ── Rewarded ─────────────────────────────────────────────────────────── */
-
-    private fun loadRewarded() {
-        rewardedLoaded = false
-        UnityAds.load(REWARDED_PLACEMENT, object : IUnityAdsLoadListener {
-            override fun onUnityAdsAdLoaded(placementId: String) {
-                Log.d(TAG, "Rewarded loaded")
-                rewardedLoaded = true
-                bridge.callJS("onRewardedAdLoaded")
-            }
-            override fun onUnityAdsFailedToLoad(
-                placementId: String,
-                error: UnityAds.UnityAdsLoadError,
-                message: String
-            ) {
-                Log.e(TAG, "Rewarded load failed: $message")
-            }
-        })
-    }
-
-    fun showRewarded() {
-        if (rewardedLoaded) {
-            rewardedLoaded = false
-            UnityAds.show(this, REWARDED_PLACEMENT, UnityAdsShowOptions(),
-                object : IUnityAdsShowListener {
-                    override fun onUnityAdsShowComplete(
-                        placementId: String,
-                        state: UnityAds.UnityAdsShowCompletionState
-                    ) {
-                        if (state == UnityAds.UnityAdsShowCompletionState.COMPLETED)
-                            bridge.callJS("onRewardedAdRewarded")
-                        bridge.callJS("onRewardedAdClosed")
-                        loadRewarded()
-                    }
-                    override fun onUnityAdsShowFailure(
-                        placementId: String,
-                        error: UnityAds.UnityAdsShowError,
-                        message: String
-                    ) {
-                        bridge.callJS("onRewardedAdFailed")
-                        loadRewarded()
-                    }
-                    override fun onUnityAdsShowStart(placementId: String) {}
-                    override fun onUnityAdsShowClick(placementId: String) {}
-                })
-        } else {
-            bridge.callJS("onRewardedAdFailed")
-            loadRewarded()
-        }
-    }
-
-    /* ── Banner (stub — shown/hidden by bridge) ───────────────────────────── */
+    /* ── Banner container (ready for AdMob) ──────────────────────────────── */
 
     fun showBanner() {
-        runOnUiThread {
-            bannerContainer.visibility = View.VISIBLE
-            bridge.callJS("onBannerAdShown")
-        }
+        runOnUiThread { bannerContainer.visibility = View.VISIBLE }
     }
 
     fun hideBanner() {
-        runOnUiThread {
-            bannerContainer.visibility = View.GONE
-            bridge.callJS("onBannerAdHidden")
-        }
+        runOnUiThread { bannerContainer.visibility = View.GONE }
     }
 
     /* ── Lifecycle ────────────────────────────────────────────────────────── */
