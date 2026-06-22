@@ -8,25 +8,18 @@ class AndroidBridge(
     private val webView: WebView
 ) {
 
+    // Ad methods — stubs until AdMob is wired up
     @JavascriptInterface
-    fun showInterstitialAd() {
-        activity.runOnUiThread { activity.showInterstitial() }
-    }
+    fun showInterstitialAd() { /* AdMob will handle this */ }
 
     @JavascriptInterface
-    fun showRewardedAd() {
-        activity.runOnUiThread { activity.showRewarded() }
-    }
+    fun showRewardedAd() { /* AdMob will handle this */ }
 
     @JavascriptInterface
-    fun showBanner() {
-        activity.runOnUiThread { activity.showBanner() }
-    }
+    fun showBanner() { /* AdMob will handle this */ }
 
     @JavascriptInterface
-    fun hideBanner() {
-        activity.runOnUiThread { activity.hideBanner() }
-    }
+    fun hideBanner() { /* AdMob will handle this */ }
 
     @JavascriptInterface
     fun onGameReady() {
